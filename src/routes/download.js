@@ -35,13 +35,13 @@ router.get('/allJSON', async (req, res) => {
     }
     delete unArmedInterview.tags;
     try {
-        await fs.unlinkSync('./interview.json', (err) => {
+        await fs.unlinkSync('./Interview.json', (err) => {
             if (err) {
                 console.log("file do not exist for elimination");
             }
         });
     } catch (err) {
-        
+
     }
     var outputJson = await JSON.stringify(unArmedInterview);
     await fs.appendFileSync('Interview.json', outputJson, 'utf8', (error) => {
@@ -62,6 +62,49 @@ router.get('/Interview/:id', async (req, res) => {
     const { id } = req.params;
     await crateDocument(`interview${id}Clean`, 'select content from Interviews where idInterview = ?', id);
     res.download(`./interview${id}Clean.json`);
+});
+router.get('/InterviewTagged/:id', async (req, res) => {
+    var { id } = req.params;
+    var unArmedInterview = {
+        text: [],
+        tags: []
+    };
+    unArmedInterview.text = await pool.query('select d.typePerson,stamp,content from dialogInterviews as d left join CatTypePerson as cp on d.typePerson=cp.typePerson where idInterview =?', [id]);
+    unArmedInterview.tags = await pool.query('select id_cat_tag,stamp,sentence from tagged_process where idDialogInterview =? order by stamp', [id])
+    if (unArmedInterview.tags.length > 0) {
+        var modifiedSentences = unArmedInterview.tags.map(e => { return { stamp: e.stamp, sentence: `<tag ${e.id_cat_tag}> ${e.sentence} </tag>` } })
+        for (let index = 0; index < modifiedSentences.length; index++) {
+            const sentence = modifiedSentences[index];
+            var IofEl;
+            for (let iot = 0; iot < unArmedInterview.text.length; iot++) {
+                const eiot = unArmedInterview.text[iot];
+                if (eiot.stamp == sentence.stamp) {
+                    IofEl = iot;
+                    break;
+                }
+            }
+            var oldSentence = unArmedInterview.text[IofEl].content.toString() + "";
+            var newSentence = oldSentence.replace(unArmedInterview.tags[index].sentence, sentence.sentence);
+            unArmedInterview.text[IofEl].content = newSentence;
+        }
+    }
+    delete unArmedInterview.tags;
+    try {
+        await fs.unlinkSync('./TaggedInterview.json', (err) => {
+            if (err) {
+                console.log("file do not exist for elimination");
+            }
+        });
+    } catch (err) {
+
+    }
+    var outputJson = await JSON.stringify(unArmedInterview);
+    await fs.appendFileSync('TaggedInterview.json', outputJson, 'utf8', (error) => {
+        if (error) {
+            throw error;
+        }
+    });
+
 });
 router.get('/Fcategory/:id', async (req, res) => {
     const { id } = req.params;

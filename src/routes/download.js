@@ -35,7 +35,7 @@ router.get('/allJSON', async (req, res) => {
     }
     delete unArmedInterview.tags;
     try {
-        await fs.unlinkSync('./Interview.json', (err) => {
+        await fs.unlinkSync('./Interviews.json', (err) => {
             if (err) {
                 console.log("file do not exist for elimination");
             }
@@ -44,7 +44,7 @@ router.get('/allJSON', async (req, res) => {
 
     }
     var outputJson = await JSON.stringify(unArmedInterview);
-    await fs.appendFileSync('Interview.json', outputJson, 'utf8', (error) => {
+    await fs.appendFileSync('Interviews.json', outputJson, 'utf8', (error) => {
         if (error) {
             throw error;
         }
@@ -104,7 +104,7 @@ router.get('/InterviewTagged/:id', async (req, res) => {
             throw error;
         }
     });
-
+    res.download('./TaggedInterview.json');
 });
 router.get('/Fcategory/:id', async (req, res) => {
     const { id } = req.params;
@@ -117,7 +117,7 @@ router.get('/Filtered/:id', async (req, res) => {
     res.send('para descargar filtrados');
 });
 router.get('/allTags', async (req, res) => {
-    const tags = pool.query('select * from tagged_process');
+    const tags = await pool.query('select * from tagged_process');
     try {
         await fs.unlinkSync('./allTags.json', (err) => {
             if (err) {
@@ -135,6 +135,14 @@ router.get('/allTags', async (req, res) => {
     });
     res.download(`./allTags.json`);
 });
+router.get('/FilteredTagsFromInterview/:title/:interview', async (req, res) => {
+    const { title , interview } = req.params;
+    const query = `select * from tagged_process where title = ? and idInterview = ?`;
+    var tags = await pool.query(query,[title,interview]);
+    console.log(tags);
+    res.send(`./tags${title}.json`);
+});
+
 async function crateDocument(name, query, id) {
     const qry = await pool.query(query, [id]);
     try {
@@ -152,7 +160,6 @@ async function crateDocument(name, query, id) {
         }
     });
     console.log('added ' + name);
-
 }
 
 

@@ -203,14 +203,17 @@ function DeletMenuIfExists() {
 }
 function loadTags(tagsinOpt) {
   //Pasar a un helper de handlebars
-  for (const key in tagsinOpt) {
-    if (tagsinOpt.hasOwnProperty(key)) {
+  const nodes = tagsinOpt.childNodes;
+  for (const key in nodes) {
+    if (tagsinOpt.childNodes.hasOwnProperty(key)) {
       const node = tagsinOpt[key];
-      const tag= node.innerText.split(" ");
+      if(node!= undefined || ""){
+        const tag= node.innerText.split(" ");
       const stamp = tag[0];
       const color = node.style.color;
       const selectedText = tag.slice(2).reduce((a,c)=>a+" "+c);
       addNewTag(stamp, null, color, selectedText, document.getElementById('line' + stamp)); 
+      }
     }
   }
 }

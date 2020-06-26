@@ -35,7 +35,7 @@ router.post('/watch/:id',async(req,res)=>{
    const { id } = req.params;
    const consultinterview = await pool.query('select * from austenriggs.dialoginterviews where idInterview = ? order by stamp', [id]);
    const consultCategories = await pool.query('select id_cat_tag,title,color from cat_tags');
-   const categoriesInDialog = await pool.query(`Select distinct title from tagged_process join cat_tags on tagged_process.id_cat_tag=cat_tags.id_cat_tag where idDialogInterview =?`,[id]);
+   const categoriesInDialog = await pool.query(`Select distinct title,idDialogInterview from tagged_process join cat_tags on tagged_process.id_cat_tag=cat_tags.id_cat_tag where idDialogInterview =?`,[id]);
    const query =`Select stamp,sentence,title,cat_tags.color from tagged_process join cat_tags on tagged_process.id_cat_tag=cat_tags.id_cat_tag where idDialogInterview =${id}`.concat((titles != "")? ` and title in (${titles})`:"");
    const tags = await pool.query(query);
    res.render('interviews/watch', { interview: toArray(consultinterview), idInterview: id, categories: consultCategories, tags: tags,categoriesDialog:categoriesInDialog});

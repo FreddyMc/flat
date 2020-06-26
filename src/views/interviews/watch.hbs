@@ -26,7 +26,7 @@
 
                 {{#each categoriesDialog as |category|}}
                 <a class="dropdown-item"
-                  href="/interviews/Download/FilteredTagsFromInterview?id={{category.idDialogInterview}}">{{category.title}}</a>
+                  href="/interviews/Download/FilteredTagsFromInterview?id={{category.idDialogInterview}}&title={{category.title}}">{{category.title}}</a>
                 {{else}}
                 <a class="dropdown-item" href="#">No Categories</a>
                 {{/each}}
